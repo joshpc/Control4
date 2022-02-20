@@ -3,6 +3,7 @@ import XCTest
 
 final class Control4Tests: XCTestCase {
     func testExample() async throws {
-		try await Control4Controller(at: "192.168.2.46").rampValue(device: 72, variable: 1001, newValue: 0.0)
+//        try await Control4Controller(at: "192.168.2.46").getScenes()
+        try await Control4Controller(at: "192.168.2.46").getScene(62)
     }
 }

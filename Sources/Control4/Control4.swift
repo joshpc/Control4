@@ -16,49 +16,53 @@ public class Control4Controller: NSObject, URLSessionDelegate {
 		session = URLSession(configuration: .default)
 		self.controllerIP = controllerIP
     }
+    
+    public func getScenes() async throws {
+        let (data, response) = try await performRequest(urlRequest("GET", path: "scenes"))
+        
+        print(data)
+        print(response)
+    }
+    
+    public func getScene(_ sceneId: Int) async throws {
+        let (data, response) = try await performRequest(urlRequest("GET", path: "scene/\(sceneId)"))
+        
+        print(data)
+        print(response)
+    }
+    
+    public func activateScene(_ sceneId: Int) async throws {
+        let (data, response) = try await performRequest(urlRequest("POST", path: "scene/\(sceneId)/activate"))
+        
+        print(data)
+        print(response)
+    }
+    
+    public func deactivateScene(_ sceneId: Int) async throws {
+        let (data, response) = try await performRequest(urlRequest("POST", path: "scene/\(sceneId)/deactivate"))
+        
+        print(data)
+        print(response)
+    }
 	
-	public func getValue(proxy proxyId: Int, variable variableId: Int) async throws {
-		//TODO: Rebuild the 2way-web-driver to be secure
-//		guard let url = URL(string: "http://\(self.controllerIP):9000/") else {
-		guard let url = URL(string: "http://\(self.controllerIP):9000/?command=get&proxyID=\(proxyId)&variableID=\(variableId)") else {
-			print("Invalid url for \(proxyId), \(variableId)")
-			return
-		}
-		
-		let (data, response) = try await performRequest(with: url)
-		
-		print(data)
-		print(response)
-	}
-	
-	public func setValue(device proxyId: Int, variable variableId: Int, newValue: Double) async throws {
-		//TODO: Rebuild the 2way-web-driver to be secure
-		guard let url = URL(string: "http://\(self.controllerIP):9000/?command=set&proxyID=\(proxyId)&variableID=\(variableId)&newValue=\(newValue)") else {
-			print("Invalid url for \(proxyId), \(variableId), \(newValue)")
-			return
-		}
-		
-		let (data, response) = try await performRequest(with: url)
-		
-		print(data)
-		print(response)
-	}
-	
-	public func rampValue(device proxyId: Int, variable variableId: Int, newValue: Double) async throws {
-		//TODO: Rebuild the 2way-web-driver to be secure
-		guard let url = URL(string: "http://\(self.controllerIP):9000/?command=ramp&proxyID=\(proxyId)&variableID=\(variableId)&newValue=\(newValue)") else {
-			print("Invalid url for \(proxyId), \(variableId), \(newValue)")
-			return
-		}
-		
-		let (data, response) = try await performRequest(with: url)
-		
-		print(data)
-		print(response)
-	}
-	
-	private func performRequest(with url: URL) async throws -> ([String : Any], HTTPURLResponse) {
-		let (data, response) = try await session.data(from: url)
+    private func urlRequest(_ method: String, path: String, body: Any? = nil) throws -> URLRequest {
+        guard let url = URL(string: "http://\(self.controllerIP):9000/\(path)") else {
+            throw Control4Error("Invalid url for IP: \(self.controllerIP) and path \(path)")
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        if let httpBody = body {
+            request.httpBody = try JSONSerialization.data(withJSONObject: httpBody, options: [])
+        }
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+
+        return request
+    }
+    
+    private func performRequest(_ request: URLRequest) async throws -> ([String : Any], HTTPURLResponse) {
+        let (data, response) = try await session.data(for: request)
 		
 		guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode >= 200, httpResponse.statusCode < 300 else {
 			throw Control4Error("Invalid response received \(response)")
