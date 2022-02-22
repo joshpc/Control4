@@ -52,8 +52,8 @@ public class Control4Controller: NSObject, URLSessionDelegate {
         
         var request = URLRequest(url: url)
         request.httpMethod = method
-        if let httpBody = body {
-            request.httpBody = try JSONSerialization.data(withJSONObject: httpBody, options: [])
+        if let body = body {
+            request.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
         }
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json", forHTTPHeaderField: "Accept")
