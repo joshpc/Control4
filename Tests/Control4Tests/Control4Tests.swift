@@ -4,8 +4,9 @@ import XCTest
 final class Control4Tests: XCTestCase {
     private let controller = Control4Controller(at: "")
     
-    func testExample() async throws {
-        try await self.controller.getScenes()
+    func testGetScenes() async throws {
+        let scenes = try await self.controller.getScenes()
+        assert(scenes.count > 0)
     }
     
     func testGetSecondFloorHallway() async throws {
