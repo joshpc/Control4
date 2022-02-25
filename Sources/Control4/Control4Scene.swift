@@ -18,6 +18,12 @@ public struct Control4Scene: Identifiable, Codable {
         case id = "scene_id"
     }
 
+    public init(id: Int, isActive: Bool, name: String) {
+        self.id = id
+        self.isActive = isActive
+        self.name = name
+    }
+    
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         
